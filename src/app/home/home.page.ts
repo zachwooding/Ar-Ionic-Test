@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import {Router } from '@angular/router';
 import { CameraPreview, CameraPreviewPictureOptions, CameraPreviewOptions, CameraPreviewDimensions } from '@ionic-native/camera-preview/ngx';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+import { AlertController } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
+
 
 @Component({
   selector: 'app-home',
@@ -10,7 +13,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 })
 export class HomePage implements OnInit  {
 
-  constructor(private camera: Camera, private router:Router, private cameraPreview: CameraPreview) { }
+  constructor(private platform: Platform, private camera: Camera, private router:Router, private cameraPreview: CameraPreview, private alertCtrl: AlertController) { }
   
 
   ngOnInit(){
@@ -20,37 +23,42 @@ export class HomePage implements OnInit  {
   openARCamera(){
     
 
-    // const cameraPreviewOpts: CameraPreviewOptions = {
-    //   x: 0,
-    //   y: 0,
-    //   width: window.screen.width,
-    //   height: window.screen.height,
-    //   camera: 'rear',
-    //   tapPhoto: true,
-    //   previewDrag: true,
-    //   toBack: true,
-    //   alpha: 1
-    // }
+    var cameraPreviewOpts: CameraPreviewOptions = {
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 10,
+      camera: 'rear',
+      tapPhoto: false,
+      previewDrag: false,
+      toBack: true,
+      alpha: 1
+    };
 
-    // this.cameraPreview.startCamera(cameraPreviewOpts).then((info) => {
-    //   alert(info);
-    // }).catch((err) => {
-    //   alert(err);
-    // });
+    
+    this.platform.ready().then(() => {
+      this.cameraPreview.startCamera(cameraPreviewOpts).then((info) => {
+        this.presentAlert();
+      }).catch((err) => {
+        this.presentAlert(err);
+      });
+    });
+
     
     
     
+    
 
 
-    this.router.navigate(['../ar'])
+    //this.router.navigate(['../ar'])
   }
 
   openNormalCamera(){
     const cameraOpts: CameraOptions = {
       quality: 100,
-  destinationType: this.camera.DestinationType.FILE_URI,
-  encodingType: this.camera.EncodingType.JPEG,
-  mediaType: this.camera.MediaType.PICTURE
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE
     }
 
     this.camera.getPicture(cameraOpts).then((imageData) => {
@@ -64,4 +72,15 @@ export class HomePage implements OnInit  {
   }
 
   
+
+  
+  async presentAlert(error?) {
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: error,
+        buttons: ['OK']
+      });
+  
+      await alert.present();
+    }
 }
